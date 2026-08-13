@@ -53,16 +53,22 @@ from whowhen_eval.run import (
 from whowhen_eval.score import score
 
 
-# The 11 released frameworks. Every one must round-trip.
+# The released frameworks. Every one must round-trip.
 FRAMEWORKS = (
     "smolagents", "alfagent", "debate", "dylan", "macnet", "magentic-one",
     "mathchat", "metagpt", "pixelcraft", "dvd", "eva",
+    # image_gui split (GUI agents)
+    "coact", "openai_cua", "agentoccam", "gemini",
 )
 
 # Which split a framework's traces live in. Everything not listed here is
 # in text.jsonl; the hint exists so that finding, say, a macnet sample
 # never reads the multi-GB image split.
-FRAMEWORK_SPLIT = {"pixelcraft": "image", "dvd": "video", "eva": "video"}
+FRAMEWORK_SPLIT = {
+    "pixelcraft": "image", "dvd": "video", "eva": "video",
+    "coact": "image_gui", "openai_cua": "image_gui",
+    "agentoccam": "image_gui", "gemini": "image_gui",
+}
 
 # Preferred sample: a C.3 (multi-agent over-reliance) trace, because it is
 # the mode with the most scorer machinery behind it.
@@ -132,11 +138,16 @@ def _gt_locator(gt: dict, framework: str) -> tuple[Optional[str], set[str]]:
         if rd is not None:
             return f"{rd}", agents  # debate/dylan: round-only acceptable
         return None, agents
-    if framework in ("magentic-one", "smolagents", "alfagent"):
+    if framework in ("magentic-one", "smolagents", "alfagent",
+                     "coact", "openai_cua", "agentoccam", "gemini"):
         # GT.step is already the rendered coord.
         s = gt.get("step")
         if framework in ("smolagents", "alfagent") and not agents:
             agents = {"agent"}  # renderer hardcodes the single-agent label
+        if framework == "openai_cua" and not agents:
+            agents = {"computer_use_agent"}  # render/gui.py per-step label
+        if framework in ("agentoccam", "gemini") and not agents:
+            agents = {"web_agent"}           # render/gui.py per-step label
         return (str(s) if s is not None else None), agents
     if framework == "mathchat":
         rd = gt.get("round")
@@ -281,7 +292,7 @@ def _scan_split(
     path = split_path(data_root, split)
     if not path.is_file() or not wanted:
         return
-    probe_first = split == "image"  # rows here run to tens of MB
+    probe_first = split in ("image", "image_gui")  # rows here run to tens of MB
     for offset, line in iter_split_lines(path):
         meta = parse_row_meta(line)
         if meta is None:

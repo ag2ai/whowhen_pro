@@ -29,12 +29,17 @@ metagpt          ``gt.stage``
 dvd              ``gt.step - 2``   (trajectory[0..1] are framing)
 eva              ``(gt.step - 2) // 2``  (assistant+tool fold into 1 step)
 debate, dylan    round only — any position within ``gt.round`` counts
+openai_cua       ``gt.step`` (identity; agent axis = fixed label)
+agentoccam       ``gt.step`` (identity; agent axis = fixed label)
+gemini           ``gt.step`` (identity; agent axis = fixed label)
 default          ``gt.step_coord`` / ``gt.step`` / ``round.position``
 ===============  ================================================
 
 ``macnet``, ``pixelcraft`` and ``magentic-one`` use the default: their GT
 already carries the rendered coordinate (``round``/``position``, or a
-pre-composed ``step`` string).
+pre-composed ``step`` string). ``coact`` (image_gui split) also uses the
+default: multi-agent, GT carries the named agent plus a 1-indexed
+``step`` that IS the rendered coordinate.
 """
 from __future__ import annotations
 
@@ -236,6 +241,51 @@ def _score_smolagents(pred: Optional[dict], gt: dict) -> dict:
 @register("alfagent")
 def _score_alfagent(pred: Optional[dict], gt: dict) -> dict:
     return _score_smolagents(pred, gt)
+
+
+# ---------------------------------------------------------------------------
+# GUI single-agent frameworks (image_gui split)
+# ---------------------------------------------------------------------------
+#
+# Same shape as smolagents: one acting agent, ``gt.agent`` is null, and
+# ``gt.step`` is 1-indexed in the renderer's own coordinate space
+# (identity). The difference is the label: render/gui.py labels each step
+# with the trace's actual agent name (``computer_use_agent`` for
+# openai_cua on OSWorld; ``web_agent`` for agentoccam / gemini on
+# WebVoyager), so that's what the judge sees and what we accept.
+#
+# ``coact`` — the multi-agent GUI framework — is NOT registered here: the
+# default scorer handles it (named ``gt.agent``, identity ``gt.step``).
+
+
+def _score_gui_single(pred: Optional[dict], gt: dict, label: str) -> dict:
+    if not pred:
+        return dict(_MISS)
+
+    canon_mode = _norm_mode(gt.get("mode"))
+    canon_step = str(gt.get("step")) if gt.get("step") is not None else ""
+
+    ok_agents = {label}  # what render/gui.py emits for every step
+    ok_steps = {canon_step} if canon_step else set()
+    ok_modes = {canon_mode} if canon_mode else set()
+
+    _accepted(gt, ok_agents, ok_steps, ok_modes)
+    return _verdict(pred, ok_agents, ok_steps, ok_modes)
+
+
+@register("openai_cua")
+def _score_openai_cua(pred: Optional[dict], gt: dict) -> dict:
+    return _score_gui_single(pred, gt, "computer_use_agent")
+
+
+@register("agentoccam")
+def _score_agentoccam(pred: Optional[dict], gt: dict) -> dict:
+    return _score_gui_single(pred, gt, "web_agent")
+
+
+@register("gemini")
+def _score_gemini(pred: Optional[dict], gt: dict) -> dict:
+    return _score_gui_single(pred, gt, "web_agent")
 
 
 # ---------------------------------------------------------------------------

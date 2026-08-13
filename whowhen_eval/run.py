@@ -1,8 +1,8 @@
 """All-at-once attribution eval runner.
 
 Reads the dataset's JSONL splits — ``<data-root>/data/text.jsonl``,
-``image.jsonl`` and ``video.jsonl``, one row per trace — builds an
-all-at-once prompt for each trace via
+``image.jsonl``, ``image_gui.jsonl`` and ``video.jsonl``, one row per
+trace — builds an all-at-once prompt for each trace via
 :func:`whowhen_eval.prompts.all_at_once`, sends it to the requested model
 through LiteLLM, parses the response, scores it, and appends one JSONL
 record per trace to::
@@ -84,13 +84,17 @@ from .score import score as score_prediction
 from .store import ResultsStore
 
 # The dataset splits. A split name is also the trace's modality.
-MODALITIES = ("text", "image", "video")
+# ``image_gui`` is the GUI-agent split (desktop/web screenshots); its
+# images are embedded base64 in the rows, like ``image``.
+MODALITIES = ("text", "image", "image_gui", "video")
 
 # Frameworks with a ``render(release)`` implementation in
 # ``whowhen_eval.render``. Only used to sanity-check ``--framework``.
 FRAMEWORKS = (
     "smolagents", "alfagent", "debate", "dylan", "macnet", "magentic-one",
     "mathchat", "metagpt", "pixelcraft", "dvd", "eva",
+    # image_gui split (GUI agents; one shared renderer)
+    "coact", "openai_cua", "agentoccam", "gemini",
 )
 
 # The build writes rows with compact separators and ``id``/``framework``/

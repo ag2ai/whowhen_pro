@@ -14,9 +14,9 @@ shared across MASes), so we compute macro-F1 across all observed classes
 within the cell, not per-MAS.
 
 The composite leaderboard score per axis is the arithmetic mean across
-the three modalities (text/image/video). Models without all 3 modalities
-get the composite computed only on the modalities they have, marked
-with a dagger in the printed table.
+the modalities (text/image/image_gui/video). Models without all
+modalities get the composite computed only on the modalities they have,
+marked with a dagger in the printed table.
 
 Usage
 -----
@@ -40,9 +40,13 @@ from typing import Optional
 # MASes whose agent attribution is degenerate — architecturally one acting
 # agent, so ``ground_truth.agent`` carries no information. They are
 # excluded from the Who denominator but still count toward When/What/All.
-# Of the 11 released frameworks, the multi-agent ones are debate, dylan,
-# macnet, magentic-one, metagpt and dvd.
-SINGLE_AGENT_FRAMEWORKS = {"smolagents", "alfagent", "mathchat", "pixelcraft", "eva"}
+# Multi-agent frameworks: debate, dylan, macnet, magentic-one, metagpt,
+# dvd, and coact (image_gui split: orchestrator/coder/computer).
+SINGLE_AGENT_FRAMEWORKS = {
+    "smolagents", "alfagent", "mathchat", "pixelcraft", "eva",
+    # image_gui split (GUI agents): all single-agent except coact
+    "openai_cua", "agentoccam", "gemini",
+}
 
 AXES = ("Who", "When", "What", "All")
 
@@ -156,7 +160,8 @@ def main(argv: Optional[list[str]] = None) -> int:
                     help="Results root: one subdirectory per model (default ./results)")
     ap.add_argument("--models", nargs="*", default=None,
                     help="Optional subset of model directory names to include.")
-    ap.add_argument("--modalities", nargs="*", default=list(("text", "image", "video")),
+    ap.add_argument("--modalities", nargs="*",
+                    default=list(("text", "image", "image_gui", "video")),
                     help="Modalities to report (cells in the table).")
     args = ap.parse_args(argv)
 

@@ -2,7 +2,8 @@
 
 Each release JSON declares its ``framework`` (``smolagents``, ``debate``,
 ``dylan``, ``macnet``, ``mathchat``, ``metagpt``, ``magentic`` /
-``magentic-one``, ``pixelcraft``, ``dvd``, ``eva``); ``get_renderer()``
+``magentic-one``, ``pixelcraft``, ``dvd``, ``eva``, plus the GUI four:
+``coact``, ``openai_cua``, ``agentoccam``, ``gemini``); ``get_renderer()``
 dispatches to the matching module's ``render()`` function.
 
 A renderer's job is to turn the release JSON into a ``RenderResult`` of
@@ -66,5 +67,10 @@ def get_renderer(framework: str):
         return mod.render
     if fw == "eva":
         from . import eva as mod
+        return mod.render
+    if fw in ("coact", "openai_cua", "agentoccam", "gemini"):
+        # The four GUI frameworks (image_gui split) share one release
+        # trajectory schema, so a single renderer serves them all.
+        from . import gui as mod
         return mod.render
     raise ValueError(f"no renderer registered for framework={framework!r}")
