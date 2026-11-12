@@ -113,10 +113,11 @@ Averaging per framework keeps one large benchmark cell from dominating the overa
 If you find this work useful, please cite:
 
 ```bibtex
-@article{liu2026pro,
-  title={Who\&When Pro: Can LLMs Really Attribute Failures in AI Agents?},
+@inproceedings{liu2026pro,
+  title={Who\&When Pro: Can {LLM}s Really Attribute Failures in {AI} Agents?},
   author={Liu, Jiale and Xi, Huajun and Zhang, Shaokun and Zeng, Yifan and Yue, Tianwei and Wang, Chi and Kang, Jian and Wu, Qingyun and Wang, Huazheng},
-  journal={arXiv preprint arXiv:2607.09996},
-  year={2026}
+  booktitle={The Fortieth Annual Conference on Neural Information Processing Systems Evaluations and Datasets Track},
+  year={2026},
+  url={https://openreview.net/forum?id=ot6saieu5V}
 }
 ```
