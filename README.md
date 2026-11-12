@@ -40,7 +40,7 @@ Given a failed agent trajectory, a model is evaluated on four axes:
 ### Install
 
 ```bash
-git clone https://github.com/whowhenpro/whowhen_pro.git && cd whowhen_pro
+git clone https://github.com/ag2ai/whowhen_pro.git && cd whowhen_pro
 pip install -e .
 ```
 
@@ -105,7 +105,7 @@ Averaging per framework keeps one large benchmark cell from dominating the overa
 ## 🗺️ Roadmap
 
 - [x] Evaluation harness release
-- [ ] Full benchmark data release
+- [x] Full benchmark data release
 - [ ] Data generation pipeline release
 
 ## 📝 Citation
